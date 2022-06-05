@@ -13,7 +13,7 @@
 //! limitations under the License.
 
 use anyhow::*;
-use std::io::{BufReader, BufWriter, Cursor, Read, Seek, SeekFrom, Write};
+use std::io::{BufReader, BufWriter, Cursor, Read, Write};
 
 /// Reads num bytes from buf, returning them as a Vec<u8>.
 pub fn read_bytes(buf: &mut BufReader<Cursor<Vec<u8>>>, num: usize) -> Result<Vec<u8>> {
@@ -23,15 +23,6 @@ pub fn read_bytes(buf: &mut BufReader<Cursor<Vec<u8>>>, num: usize) -> Result<Ve
         return Err(anyhow!("Failed reading bytes"));
     }
     Ok(dest)
-}
-
-/// Gets the bytes without actually reading them.
-pub fn peek_bytes(buf: &mut BufReader<Cursor<Vec<u8>>>, num: usize) -> Result<Vec<u8>> {
-    // store the position before the read
-    let pos = buf.stream_position()?;
-    let bytes = read_bytes(buf, num)?;
-    buf.seek(SeekFrom::Start(pos))?;
-    Ok(bytes)
 }
 
 /// Writes some bytes.
@@ -52,8 +43,7 @@ pub fn str_from_u8_nul_utf8(utf8_src: &[u8]) -> Result<&str, std::str::Utf8Error
 
 #[cfg(test)]
 mod tests {
-    use super::{peek_bytes, read_bytes, write_bytes};
-    use std::io::{BufReader, BufWriter, Cursor};
+    use super::*;
 
     #[test]
     fn read() {
@@ -63,18 +53,6 @@ mod tests {
         assert_eq!(read_bytes(&mut buf, 3).unwrap(), vec![3, 4, 5]);
         assert_eq!(read_bytes(&mut buf, 2).unwrap(), vec![6, 7]);
         assert_eq!(read_bytes(&mut buf, 1).is_err(), true);
-    }
-
-    #[test]
-    fn peek() {
-        let buf: Vec<u8> = vec![0, 1, 2, 3, 4, 5, 6, 7];
-        let mut buf = BufReader::new(Cursor::new(buf));
-        assert_eq!(peek_bytes(&mut buf, 3).unwrap(), vec![0, 1, 2]);
-        assert_eq!(peek_bytes(&mut buf, 3).unwrap(), vec![0, 1, 2]);
-        assert_eq!(read_bytes(&mut buf, 3).unwrap(), vec![0, 1, 2]);
-        assert_eq!(peek_bytes(&mut buf, 3).unwrap(), vec![3, 4, 5]);
-        assert_eq!(peek_bytes(&mut buf, 3).unwrap(), vec![3, 4, 5]);
-        assert_eq!(read_bytes(&mut buf, 3).unwrap(), vec![3, 4, 5]);
     }
 
     #[test]
