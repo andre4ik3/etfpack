@@ -57,10 +57,7 @@ impl Term<Atom> for AtomPacker {
             if max_length == u8::MAX.into() {
                 vec![u8::try_from(data.value.len()).unwrap()]
             } else {
-                u16::try_from(data.value.len())
-                    .unwrap()
-                    .to_be_bytes()
-                    .to_vec()
+                u16::try_from(data.value.len())?.to_be_bytes().to_vec()
             }
         };
 
@@ -107,13 +104,10 @@ impl Term<Atom> for AtomPacker {
     }
 
     fn can_unpack(first_byte: &u8) -> bool {
-        match first_byte {
-            &ATOM_UTF8_EXT => true,
-            &SMALL_ATOM_UTF8_EXT => true,
-            &ATOM_EXT => true,
-            &SMALL_ATOM_EXT => true,
-            _ => false,
-        }
+        first_byte == &ATOM_EXT
+            || first_byte == &ATOM_UTF8_EXT
+            || first_byte == &SMALL_ATOM_EXT
+            || first_byte == &SMALL_ATOM_UTF8_EXT
     }
 }
 
@@ -126,27 +120,6 @@ mod tests {
     const PACKED_ATOM_UTF8: [u8; 7] = [118, 0, 4, 98, 114, 117, 104];
     const PACKED_SMALL_ATOM: [u8; 6] = [115, 4, 98, 114, 117, 104];
     const PACKED_SMALL_ATOM_UTF8: [u8; 6] = [119, 4, 98, 114, 117, 104];
-
-    #[test]
-    fn can_pack() {
-        let atom = Atom {
-            kind: AtomKind::Legacy,
-            value: "123".to_string(),
-        };
-        let string = AnyTerm::String("b".to_string());
-
-        assert_eq!(AtomPacker::can_pack(&AnyTerm::Atom(atom)), true);
-        assert_eq!(AtomPacker::can_pack(&string), false);
-    }
-
-    #[test]
-    fn can_unpack() {
-        assert_eq!(AtomPacker::can_unpack(&ATOM_EXT), true);
-        assert_eq!(AtomPacker::can_unpack(&ATOM_UTF8_EXT), true);
-        assert_eq!(AtomPacker::can_unpack(&SMALL_ATOM_EXT), true);
-        assert_eq!(AtomPacker::can_unpack(&SMALL_ATOM_UTF8_EXT), true);
-        assert_eq!(AtomPacker::can_unpack(&123), false);
-    }
 
     #[test]
     fn pack_atom() {

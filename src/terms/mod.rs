@@ -16,11 +16,13 @@ mod atom;
 mod float;
 mod integer;
 mod small_integer;
+mod string;
 
 pub use atom::*;
 pub use float::*;
 pub use integer::*;
 pub use small_integer::*;
+pub use string::*;
 
 use crate::structs::*;
 

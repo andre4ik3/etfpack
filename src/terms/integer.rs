@@ -43,32 +43,16 @@ impl Term<i32> for IntegerPacker {
     }
 
     fn can_unpack(first_byte: &u8) -> bool {
-        match first_byte {
-            &INTEGER_EXT => true,
-            _ => false,
-        }
+        first_byte == &INTEGER_EXT
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::terms::AnyTerm;
 
     const VALUE: i32 = 299792458;
     const PACKED_INTEGER: [u8; 5] = [98, 17, 222, 120, 74];
-
-    #[test]
-    fn can_pack() {
-        assert_eq!(IntegerPacker::can_pack(&AnyTerm::Integer(123)), true);
-        assert_eq!(IntegerPacker::can_pack(&AnyTerm::SmallInt(123)), false);
-    }
-
-    #[test]
-    fn can_unpack() {
-        assert_eq!(IntegerPacker::can_unpack(&INTEGER_EXT), true);
-        assert_eq!(IntegerPacker::can_unpack(&123), false);
-    }
 
     #[test]
     fn pack() {

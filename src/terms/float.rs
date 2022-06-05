@@ -56,18 +56,13 @@ impl Term<f64> for FloatPacker {
     }
 
     fn can_unpack(first_byte: &u8) -> bool {
-        match first_byte {
-            &FLOAT_EXT => true,
-            &NEW_FLOAT_EXT => true,
-            _ => false,
-        }
+        first_byte == &FLOAT_EXT || first_byte == &NEW_FLOAT_EXT
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::terms::AnyTerm;
 
     const VALUE: f64 = 1.234;
     const PACKED_FLOAT: [u8; 32] = [
@@ -75,19 +70,6 @@ mod tests {
         0, 0, 0, 0,
     ];
     const PACKED_NEW_FLOAT: [u8; 9] = [70, 63, 243, 190, 118, 200, 180, 57, 88];
-
-    #[test]
-    fn can_pack() {
-        assert_eq!(FloatPacker::can_pack(&AnyTerm::Float(12.345)), true);
-        assert_eq!(FloatPacker::can_pack(&AnyTerm::Integer(123)), false);
-    }
-
-    #[test]
-    fn can_unpack() {
-        assert_eq!(FloatPacker::can_unpack(&FLOAT_EXT), true);
-        assert_eq!(FloatPacker::can_unpack(&NEW_FLOAT_EXT), true);
-        assert_eq!(FloatPacker::can_unpack(&123), false);
-    }
 
     #[test]
     fn pack() {

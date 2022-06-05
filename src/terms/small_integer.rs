@@ -39,32 +39,16 @@ impl Term<u8> for SmallIntPacker {
     }
 
     fn can_unpack(first_byte: &u8) -> bool {
-        match first_byte {
-            &SMALL_INTEGER_EXT => true,
-            _ => false,
-        }
+        first_byte == &SMALL_INTEGER_EXT
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::terms::AnyTerm;
 
     const VALUE: u8 = 248;
     const PACKED_INTEGER: [u8; 2] = [97, 248];
-
-    #[test]
-    fn can_pack() {
-        assert_eq!(SmallIntPacker::can_pack(&AnyTerm::Integer(123)), false);
-        assert_eq!(SmallIntPacker::can_pack(&AnyTerm::SmallInt(123)), true);
-    }
-
-    #[test]
-    fn can_unpack() {
-        assert_eq!(SmallIntPacker::can_unpack(&SMALL_INTEGER_EXT), true);
-        assert_eq!(SmallIntPacker::can_unpack(&123), false);
-    }
 
     #[test]
     fn pack() {
